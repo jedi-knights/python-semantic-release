@@ -186,3 +186,18 @@ def test_get_current_version_empty_file(tmp_path, service):
     path = tmp_path / "VERSION"
     path.write_text("")
     assert service.get_current_version(path) is None
+
+
+def test_bump_unknown_release_type_raises(service):
+    from python_semantic_release.version.service import SemanticVersion
+    v = SemanticVersion(1, 0, 0)
+    with pytest.raises(ValueError):
+        v.bump("unknown")  # type: ignore[arg-type]
+
+
+def test_update_pyproject_toml(tmp_path, service):
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text('[project]\nversion = "0.1.0"\n')
+    service.update_pyproject_toml(pyproject, "1.0.0")
+    import toml
+    assert toml.load(pyproject)["project"]["version"] == "1.0.0"

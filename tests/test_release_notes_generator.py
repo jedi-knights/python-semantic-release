@@ -198,3 +198,29 @@ def test_changelog_service_strips_existing_title(tmp_path, generator):
     content = changelog.read_text()
     # title should appear only once
     assert content.count("# Changelog") == 1
+
+
+def test_get_compare_url_no_last_release(tmp_path, generator):
+    ctx = make_context(tmp_path, commits=[make_commit(message="feat: x")])
+    ctx.last_release = None
+    ctx.next_release = Release(version="0.1.0", git_tag="v0.1.0", git_head="sha")
+    notes = generator.generate_notes(ctx)
+    assert "0.1.0" in notes
+
+
+def test_format_issue_references_non_github_url(tmp_path, generator):
+    ctx = _ctx_with_release(
+        tmp_path,
+        [make_commit(message="fix: thing", body="Closes #5")],
+    )
+    ctx.options.repository_url = "https://gitlab.com/owner/repo"
+    notes = generator.generate_notes(ctx)
+    assert "fix" in notes or "thing" in notes
+
+
+def test_format_section_empty_commits_returns_empty(tmp_path, generator):
+    from python_semantic_release.changelog.generator import CommitGroup
+    ctx = make_context(tmp_path)
+    empty_group = CommitGroup(title="Features", commits=[], priority=1)
+    result = generator._format_section(empty_group, ctx)
+    assert result == ""

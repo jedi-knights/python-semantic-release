@@ -89,3 +89,15 @@ def test_prepare_creates_nested_toml_keys(tmp_path, updater):
     updater.prepare(ctx)
     data = toml.load(pyproject)
     assert data["project"]["version"] == "1.0.0"
+
+
+def test_update_toml_creates_missing_parent_key(tmp_path, updater):
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text("")  # empty — no 'project' key at all
+    ctx = _ctx_with_release(tmp_path, "1.0.0")
+    updater.config = VersionConfig(
+        version_files=["pyproject.toml:project.version"]
+    )
+    updater.prepare(ctx)
+    data = toml.load(pyproject)
+    assert data["project"]["version"] == "1.0.0"

@@ -266,3 +266,81 @@ def test_convert_command_invalid_input_fails(runner, tmp_path):
         ["convert", "--input", str(tmp_path / "nonexistent.js")],
     )
     assert result.exit_code != 0
+
+
+def test_convert_command_with_release_rules(runner, tmp_path):
+    js_file = tmp_path / "release.config.js"
+    js_file.write_text(
+        "module.exports = { branches: ['main'], releaseRules: [{ type: 'docs', release: 'patch' }] };"
+    )
+    out_file = tmp_path / ".releaserc.yaml"
+    result = runner.invoke(
+        release,
+        ["convert", "--input", str(js_file), "--output", str(out_file)],
+    )
+    assert result.exit_code == 0
+    assert "Release Rules" in result.output
+
+
+def test_convert_command_exception_shows_error(runner, tmp_path):
+    js_file = tmp_path / "release.config.js"
+    js_file.write_text("module.exports = {};")
+    with patch(
+        "python_semantic_release.cli.ConfigConverter.convert_js_to_yaml",
+        side_effect=RuntimeError("parse failed"),
+    ):
+        result = runner.invoke(
+            release,
+            ["convert", "--input", str(js_file)],
+        )
+    assert result.exit_code != 0
+    assert "parse failed" in result.output
+
+
+def test_run_initial_release_message(runner, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    mock_release = Release(
+        version="0.1.0", git_tag="v0.1.0", git_head="sha",
+        type=ReleaseType.MINOR,
+    )
+    mock_orch = _make_mock_orchestrator(result=mock_release)
+    mock_orch.git_service.get_last_tag.return_value = None
+    with patch(
+        "python_semantic_release.cli.SemanticReleaseOrchestrator",
+        return_value=mock_orch,
+    ):
+        result = runner.invoke(release, ["run", "--no-ci"])
+    assert "initial release" in result.output
+
+
+def test_run_release_with_url(runner, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    mock_release = Release(
+        version="1.1.0", git_tag="v1.1.0", git_head="sha",
+        type=ReleaseType.MINOR,
+        url="https://github.com/owner/repo/releases/1",
+    )
+    mock_orch = _make_mock_orchestrator(result=mock_release)
+    with patch(
+        "python_semantic_release.cli.SemanticReleaseOrchestrator",
+        return_value=mock_orch,
+    ):
+        result = runner.invoke(release, ["run", "--no-ci"])
+    assert "https://github.com/owner/repo/releases/1" in result.output
+
+
+def test_format_note_line_long_notes_truncated(runner, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    long_notes = "\n".join([f"* feat: item {i}" for i in range(25)])
+    mock_release = Release(
+        version="1.1.0", git_tag="v1.1.0", git_head="sha",
+        type=ReleaseType.MINOR,
+        notes=long_notes,
+    )
+    mock_orch = _make_mock_orchestrator(result=mock_release)
+    with patch(
+        "python_semantic_release.cli.SemanticReleaseOrchestrator",
+        return_value=mock_orch,
+    ):
+        result = runner.invoke(release, ["run", "--no-ci"])
+    assert "..." in result.output
