@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from python_semantic_release.config_converter import ConfigConverter
+from python_semantic_release.config.converter import ConfigConverter
 
 
 @pytest.fixture

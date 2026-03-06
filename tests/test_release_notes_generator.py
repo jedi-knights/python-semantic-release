@@ -1,10 +1,10 @@
 import pytest
 
-from python_semantic_release.models import Release
-from python_semantic_release.release_notes_generator import (
+from python_semantic_release.changelog.generator import (
     ChangelogService,
     ReleaseNotesGenerator,
 )
+from python_semantic_release.models import Release
 from tests.conftest import make_commit, make_context
 
 

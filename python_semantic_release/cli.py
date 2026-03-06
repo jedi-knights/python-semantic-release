@@ -4,8 +4,8 @@ from typing import Any
 
 import click
 
-from python_semantic_release.config_converter import ConfigConverter
-from python_semantic_release.config_loader import ConfigLoader
+from python_semantic_release.config.converter import ConfigConverter
+from python_semantic_release.config.loader import ConfigLoader
 from python_semantic_release.models import ReleaseRule
 from python_semantic_release.orchestrator import (
     SemanticReleaseConfig,

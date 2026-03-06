@@ -2,7 +2,7 @@ import pytest
 import toml
 
 from python_semantic_release.models import Release, VersionConfig
-from python_semantic_release.version_updater import VersionUpdater
+from python_semantic_release.version.updater import VersionUpdater
 from tests.conftest import make_context
 
 

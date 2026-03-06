@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 
-from python_semantic_release.commit_parser import ConventionalCommitParser
+from python_semantic_release.commit.parser import ConventionalCommitParser
 from python_semantic_release.models import (
     Context,
     ParsedCommit,

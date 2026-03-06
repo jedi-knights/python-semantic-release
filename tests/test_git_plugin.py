@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from python_semantic_release.git_plugin import GitPlugin
+from python_semantic_release.git.plugin import GitPlugin
 from python_semantic_release.models import GitConfig, Release
 from tests.conftest import make_context
 
@@ -86,7 +86,7 @@ def test_prepare_glob_pattern_matching(tmp_path):
 def test_prepare_creates_git_service_when_none(tmp_path, monkeypatch):
     created_service = _mock_git_service(modified_files=[])
     monkeypatch.setattr(
-        "python_semantic_release.git_plugin.GitService",
+        "python_semantic_release.git.plugin.GitService",
         lambda **kwargs: created_service,
     )
     plugin = GitPlugin(git_service=None)

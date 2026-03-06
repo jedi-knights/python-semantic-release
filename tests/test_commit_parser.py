@@ -1,7 +1,7 @@
 
 import pytest
 
-from python_semantic_release.commit_parser import ConventionalCommitParser
+from python_semantic_release.commit.parser import ConventionalCommitParser
 from tests.conftest import make_commit
 
 

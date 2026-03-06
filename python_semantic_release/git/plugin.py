@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fnmatch import fnmatch
 
-from python_semantic_release.git_service import GitService
+from python_semantic_release.git.service import GitService
 from python_semantic_release.models import Context, GitConfig
 
 

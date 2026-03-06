@@ -3,7 +3,7 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
-from python_semantic_release.js_config_parser import JSConfigParser
+from python_semantic_release.config.js_parser import JSConfigParser
 
 
 class ConfigConverter:

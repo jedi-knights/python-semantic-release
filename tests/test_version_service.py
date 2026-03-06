@@ -1,7 +1,7 @@
 import pytest
 
 from python_semantic_release.models import ReleaseType
-from python_semantic_release.version_service import (
+from python_semantic_release.version.service import (
     SemanticVersion,
     VersionService,
 )

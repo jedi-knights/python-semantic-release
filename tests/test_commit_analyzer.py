@@ -1,6 +1,6 @@
 import pytest
 
-from python_semantic_release.commit_analyzer import (
+from python_semantic_release.commit.analyzer import (
     BreakingChangeRule,
     CommitAnalyzer,
     ReleaseRuleFactory,

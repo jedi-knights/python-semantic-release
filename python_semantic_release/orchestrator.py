@@ -3,10 +3,14 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from python_semantic_release.commit_analyzer import CommitAnalyzer
-from python_semantic_release.git_plugin import GitPlugin
-from python_semantic_release.git_service import GitService
-from python_semantic_release.github_service import GitHubPlugin
+from python_semantic_release.changelog.generator import (
+    ChangelogService,
+    ReleaseNotesGenerator,
+)
+from python_semantic_release.commit.analyzer import CommitAnalyzer
+from python_semantic_release.git.plugin import GitPlugin
+from python_semantic_release.git.service import GitService
+from python_semantic_release.github.service import GitHubPlugin
 from python_semantic_release.models import (
     Branch,
     ChangelogConfig,
@@ -19,12 +23,8 @@ from python_semantic_release.models import (
     ReleaseNotesConfig,
     VersionConfig,
 )
-from python_semantic_release.release_notes_generator import (
-    ChangelogService,
-    ReleaseNotesGenerator,
-)
-from python_semantic_release.version_service import VersionService
-from python_semantic_release.version_updater import VersionUpdater
+from python_semantic_release.version.service import VersionService
+from python_semantic_release.version.updater import VersionUpdater
 
 
 @dataclass

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from python_semantic_release.github_service import GitHubService
+from python_semantic_release.github.service import GitHubService
 
 
 @pytest.fixture

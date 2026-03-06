@@ -1,6 +1,6 @@
 from ruamel.yaml import YAML
 
-from python_semantic_release.config_loader import ConfigLoader
+from python_semantic_release.config.loader import ConfigLoader
 
 
 def _write_yaml(path, data):

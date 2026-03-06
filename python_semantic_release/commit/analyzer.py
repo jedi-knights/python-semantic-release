@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from python_semantic_release.commit_parser import ConventionalCommitParser
+from python_semantic_release.commit.parser import ConventionalCommitParser
 from python_semantic_release.models import (
     CommitAnalyzerConfig,
     Context,
