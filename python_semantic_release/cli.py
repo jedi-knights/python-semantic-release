@@ -71,13 +71,16 @@ def _print_notes(notes: str) -> None:
     click.echo()
 
 
-def _print_release_result(result: Any, orchestrator: Any) -> None:
+def _print_release_result(
+    result: Any, orchestrator: Any, dry_run: bool = False
+) -> None:
+    prefix = "[DRY RUN] " if dry_run else ""
     type_display = ""
     explanation = ""
     if result.type:
         type_display = f" ({result.type.value.upper()})"
         explanation = _RELEASE_EXPLANATIONS.get(result.type.value, "")
-    click.echo(f"Release Published{type_display}")
+    click.echo(f"{prefix}Release Published{type_display}")
     click.echo("=" * 80)
     last_tag = orchestrator.git_service.get_last_tag()
     if last_tag:
@@ -96,12 +99,13 @@ def _print_release_result(result: Any, orchestrator: Any) -> None:
         click.echo("  Changes in this release:")
         click.echo()
         _print_notes(result.notes)
-    click.echo("Version bump: YES")
+    click.echo(f"{prefix}Version bump: YES")
     click.echo("=" * 80)
 
 
-def _print_no_release_result(orchestrator: Any) -> None:
-    click.echo("No Release Needed")
+def _print_no_release_result(orchestrator: Any, dry_run: bool = False) -> None:
+    prefix = "[DRY RUN] " if dry_run else ""
+    click.echo(f"{prefix}No Release Needed")
     click.echo("=" * 80)
     last_tag = orchestrator.git_service.get_last_tag()
     if last_tag:
@@ -116,7 +120,7 @@ def _print_no_release_result(orchestrator: Any) -> None:
         "  * Commits like chore, docs, style, refactor, test do not trigger releases"
     )
     click.echo()
-    click.echo("Version bump: NO")
+    click.echo(f"{prefix}Version bump: NO")
     click.echo("=" * 80)
 
 
@@ -137,7 +141,10 @@ def release() -> None:
 @click.option("--dry-run", is_flag=True, help="Run without making any changes")
 @click.option("--no-ci", is_flag=True, help="Run outside of CI environment")
 @click.option(
-    "--branches", multiple=True, default=["main"], help="Branches to release from"
+    "--branches",
+    multiple=True,
+    default=["main"],
+    help="Branches to release from",
 )
 @click.option(
     "--tag-format", default="v${version}", help="Git tag format template"
@@ -145,7 +152,9 @@ def release() -> None:
 @click.option(
     "--changelog-file", default="CHANGELOG.md", help="Path to changelog file"
 )
-@click.option("--draft-release", is_flag=True, help="Create draft GitHub release")
+@click.option(
+    "--draft-release", is_flag=True, help="Create draft GitHub release"
+)
 @click.option(
     "--config",
     type=click.Path(exists=True, path_type=Path),
@@ -175,17 +184,21 @@ def run(
     try:
         click.echo("=" * 80)
         click.echo("Starting Semantic Release")
+        if dry_run:
+            click.echo("[DRY RUN] No changes will be written or published")
         click.echo("=" * 80)
         result = orchestrator.run()
         github_output = os.environ.get("GITHUB_OUTPUT")
         click.echo()
         click.echo("=" * 80)
         if result:
-            _print_release_result(result, orchestrator)
-            _write_github_output(github_output, True)
+            _print_release_result(result, orchestrator, dry_run)
+            if not dry_run:
+                _write_github_output(github_output, True)
         else:
-            _print_no_release_result(orchestrator)
-            _write_github_output(github_output, False)
+            _print_no_release_result(orchestrator, dry_run)
+            if not dry_run:
+                _write_github_output(github_output, False)
     except Exception as e:
         click.echo()
         click.echo("=" * 80, err=True)
@@ -198,13 +211,15 @@ def run(
 
 @release.command()
 @click.option(
-    "--input", "-i",
+    "--input",
+    "-i",
     type=click.Path(exists=True, path_type=Path),
     default="release.config.js",
     help="Path to JavaScript configuration file",
 )
 @click.option(
-    "--output", "-o",
+    "--output",
+    "-o",
     type=click.Path(path_type=Path),
     default=".releaserc.yaml",
     help="Path to output YAML configuration file",

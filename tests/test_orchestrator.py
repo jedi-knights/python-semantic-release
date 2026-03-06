@@ -14,8 +14,12 @@ from python_semantic_release.orchestrator import (
 from tests.conftest import make_commit, make_context
 
 
-def _make_orchestrator(tmp_path: Path, config=None) -> SemanticReleaseOrchestrator:
-    return SemanticReleaseOrchestrator(config=config or SemanticReleaseConfig(), cwd=tmp_path)
+def _make_orchestrator(
+    tmp_path: Path, config=None
+) -> SemanticReleaseOrchestrator:
+    return SemanticReleaseOrchestrator(
+        config=config or SemanticReleaseConfig(), cwd=tmp_path
+    )
 
 
 def _mock_git_service(
@@ -28,13 +32,16 @@ def _mock_git_service(
     svc = MagicMock()
     svc.get_current_branch.return_value = branch
     svc.get_last_tag.return_value = last_tag
-    svc.get_commits.return_value = commits if commits is not None else [make_commit()]
+    svc.get_commits.return_value = (
+        commits if commits is not None else [make_commit()]
+    )
     svc.get_repository_url.return_value = repo_url
     svc.get_commit_sha.return_value = sha
     return svc
 
 
 # --- __init__ ---
+
 
 def test_init_creates_git_service(tmp_path):
     orch = _make_orchestrator(tmp_path)
@@ -81,6 +88,7 @@ def test_init_uses_cwd_default(monkeypatch, tmp_path):
 
 # --- _build_context ---
 
+
 def test_build_context_uses_current_branch(tmp_path):
     orch = _make_orchestrator(tmp_path)
     orch.git_service = _mock_git_service(branch="develop")
@@ -120,6 +128,7 @@ def test_build_context_includes_commits(tmp_path):
 
 # --- _verify_conditions ---
 
+
 def test_verify_conditions_no_github_plugin_is_noop(tmp_path):
     orch = _make_orchestrator(tmp_path)
     orch.github_plugin = None
@@ -136,6 +145,7 @@ def test_verify_conditions_calls_github_plugin(tmp_path):
 
 
 # --- _calculate_next_release ---
+
 
 def test_calculate_next_release_bumps_version(tmp_path):
     orch = _make_orchestrator(tmp_path)
@@ -173,11 +183,14 @@ def test_calculate_next_release_sets_git_head(tmp_path):
 
 # --- _publish_release ---
 
+
 def test_publish_release_calls_github_plugin(tmp_path):
     orch = _make_orchestrator(tmp_path)
     orch.github_plugin = MagicMock()
     ctx = make_context(tmp_path)
-    ctx.next_release = Release(version="1.1.0", git_tag="v1.1.0", git_head="sha")
+    ctx.next_release = Release(
+        version="1.1.0", git_tag="v1.1.0", git_head="sha"
+    )
     orch.github_plugin.publish.return_value = ctx.next_release
     result = orch._publish_release(ctx)
     orch.github_plugin.publish.assert_called_once_with(ctx)
@@ -188,7 +201,9 @@ def test_publish_release_without_github_returns_next_release(tmp_path):
     orch = _make_orchestrator(tmp_path)
     orch.github_plugin = None
     ctx = make_context(tmp_path)
-    ctx.next_release = Release(version="1.1.0", git_tag="v1.1.0", git_head="sha")
+    ctx.next_release = Release(
+        version="1.1.0", git_tag="v1.1.0", git_head="sha"
+    )
     result = orch._publish_release(ctx)
     assert result is ctx.next_release
 
@@ -203,6 +218,7 @@ def test_publish_release_without_github_no_next_release(tmp_path):
 
 
 # --- _handle_success / _handle_failure ---
+
 
 def test_handle_success_calls_github_plugin(tmp_path):
     orch = _make_orchestrator(tmp_path)
@@ -244,7 +260,10 @@ def test_handle_failure_no_github_is_noop(tmp_path):
 
 # --- run ---
 
-def _patch_orchestrator(orch, release_type=ReleaseType.MINOR, published_release=None):
+
+def _patch_orchestrator(
+    orch, release_type=ReleaseType.MINOR, published_release=None
+):
     orch.git_service = _mock_git_service()
     orch.commit_analyzer = MagicMock()
     orch.commit_analyzer.analyze_commits.return_value = release_type
@@ -268,7 +287,9 @@ def test_run_returns_none_when_no_release_type(tmp_path):
 def test_run_returns_release_when_bumped(tmp_path):
     orch = _make_orchestrator(tmp_path)
     release = Release(version="1.1.0", git_tag="v1.1.0", git_head="sha")
-    _patch_orchestrator(orch, release_type=ReleaseType.MINOR, published_release=release)
+    _patch_orchestrator(
+        orch, release_type=ReleaseType.MINOR, published_release=release
+    )
     result = orch.run()
     assert result is not None
     assert result.version == "1.1.0"
@@ -301,3 +322,67 @@ def test_run_reraises_on_exception(tmp_path):
     orch.git_service.get_current_branch.side_effect = RuntimeError("git error")
     with pytest.raises(RuntimeError, match="git error"):
         orch.run()
+
+
+# --- dry-run ---
+
+
+def _make_dry_run_context(tmp_path):
+    ctx = make_context(tmp_path)
+    ctx.options.dry_run = True
+    ctx.next_release = Release(
+        version="1.1.0", git_tag="v1.1.0", git_head="sha"
+    )
+    return ctx
+
+
+def _mock_prepare_deps(orch, tmp_path):
+    orch.version_updater = MagicMock()
+    orch.changelog_service = MagicMock()
+    orch.git_plugin = MagicMock()
+    orch.git_service = _mock_git_service()
+
+
+def test_prepare_release_dry_run_skips_version_updater(tmp_path):
+    orch = _make_orchestrator(tmp_path)
+    _mock_prepare_deps(orch, tmp_path)
+    orch._prepare_release(_make_dry_run_context(tmp_path))
+    orch.version_updater.prepare.assert_not_called()
+
+
+def test_prepare_release_dry_run_skips_changelog(tmp_path):
+    orch = _make_orchestrator(tmp_path)
+    _mock_prepare_deps(orch, tmp_path)
+    orch._prepare_release(_make_dry_run_context(tmp_path))
+    orch.changelog_service.update_changelog.assert_not_called()
+
+
+def test_prepare_release_dry_run_skips_git_plugin(tmp_path):
+    orch = _make_orchestrator(tmp_path)
+    _mock_prepare_deps(orch, tmp_path)
+    orch._prepare_release(_make_dry_run_context(tmp_path))
+    orch.git_plugin.prepare.assert_not_called()
+
+
+def test_prepare_release_dry_run_skips_push(tmp_path):
+    orch = _make_orchestrator(tmp_path)
+    _mock_prepare_deps(orch, tmp_path)
+    orch._prepare_release(_make_dry_run_context(tmp_path))
+    orch.git_service.push.assert_not_called()
+
+
+def test_publish_release_dry_run_skips_github_plugin(tmp_path):
+    orch = _make_orchestrator(tmp_path)
+    orch.github_plugin = MagicMock()
+    ctx = _make_dry_run_context(tmp_path)
+    result = orch._publish_release(ctx)
+    orch.github_plugin.publish.assert_not_called()
+    assert result is ctx.next_release
+
+
+def test_handle_success_dry_run_skips_github_plugin(tmp_path):
+    orch = _make_orchestrator(tmp_path)
+    orch.github_plugin = MagicMock()
+    ctx = _make_dry_run_context(tmp_path)
+    orch._handle_success(ctx)
+    orch.github_plugin.success.assert_not_called()

@@ -184,6 +184,12 @@ class SemanticReleaseOrchestrator:
         return context
 
     def _prepare_release(self, context: Context) -> None:
+        if context.options.dry_run:
+            self._log_step("[dry-run] Skipping: version file updates")
+            self._log_step("[dry-run] Skipping: changelog update")
+            self._log_step("[dry-run] Skipping: git commit, tag, and push")
+            return
+
         self.version_updater.prepare(context)
 
         self.changelog_service.update_changelog(
@@ -197,15 +203,21 @@ class SemanticReleaseOrchestrator:
         if context.next_release:
             context.next_release.git_head = self.git_service.get_commit_sha()
 
-        if not self.config.options.dry_run and context.next_release:
-            self.git_service.push()
+        self.git_service.push()
 
     def _publish_release(self, context: Context) -> Release | None:
+        if context.options.dry_run:
+            self._log_step("[dry-run] Skipping: GitHub release creation")
+            return context.next_release
+
         if self.github_plugin and context.next_release:
             return self.github_plugin.publish(context)
         return context.next_release
 
     def _handle_success(self, context: Context) -> None:
+        if context.options.dry_run:
+            return
+
         if self.github_plugin:
             self.github_plugin.success(context)
 
