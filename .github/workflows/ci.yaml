@@ -1,0 +1,95 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+
+jobs:
+  lint-commit-message:
+    runs-on: ubuntu-latest
+
+    env:
+      PYTHON_VERSION: '3.13'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        run: uv python install ${{ env.PYTHON_VERSION }}
+
+      - name: Install commitlint
+        run: uv pip install python-commitlint
+        shell: bash
+
+      - name: Validate commit message
+        run: git log -1 --pretty=%B | uv run commitlint lint --stdin
+        shell: bash
+
+  lint:
+    runs-on: ubuntu-latest
+
+    env:
+      PYTHON_VERSION: '3.13'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        run: uv python install ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+        shell: bash
+
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+        shell: bash
+
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      PYTHON_VERSION: '3.13'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        run: uv python install ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+        shell: bash
+
+      - name: Test
+        run: uv run pytest
+        shell: bash
