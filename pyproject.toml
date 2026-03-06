@@ -1,0 +1,63 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "python-semantic-release"
+version = "0.1.0"
+description = "A Python implementation of semantic-release."
+readme = "README.md"
+requires-python = ">=3.13"
+keywords = ["semantic-release", "versioning", "changelog", "release"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "click",
+    "toml",
+    "requests",
+    "ruamel.yaml>=0.17.21",
+]
+
+[[project.authors]]
+name = "Omar Crosby"
+email = "omar.crosby@gmail.com"
+
+[project.optional-dependencies]
+dev = ["ruff", "pytest", "pytest-cov", "pytest-mock"]
+
+[project.scripts]
+semantic-release = "python_semantic_release.cli:release"
+
+[project.urls]
+Homepage = "https://github.com/jedi-knights/python-semantic-release"
+Issues = "https://github.com/jedi-knights/python-semantic-release/issues"
+
+[tool.ruff]
+line-length = 80
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP", "C90"]
+ignore = ["E501", "B008", "W191", "F821"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 7
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
