@@ -1,4 +1,3 @@
-
 import pytest
 
 from python_semantic_release.commit.parser import ConventionalCommitParser
@@ -76,7 +75,9 @@ def test_parse_breaking_exclamation_and_body(parser):
 
 
 def test_parse_non_breaking_has_false(parser):
-    result = parser.parse(make_commit(message="fix: small fix", body="no breaking"))
+    result = parser.parse(
+        make_commit(message="fix: small fix", body="no breaking")
+    )
     assert result.breaking is False
 
 
@@ -104,9 +105,7 @@ def test_parse_references_closes(parser):
 
 
 def test_parse_references_fixes(parser):
-    result = parser.parse(
-        make_commit(message="fix: patch", body="Fixes #456")
-    )
+    result = parser.parse(make_commit(message="fix: patch", body="Fixes #456"))
     assert result.references[0]["issue"] == "456"
 
 
@@ -119,7 +118,9 @@ def test_parse_references_resolves(parser):
 
 def test_parse_multiple_references(parser):
     result = parser.parse(
-        make_commit(message="fix: resolve issue", body="Closes #123\nFixes #456")
+        make_commit(
+            message="fix: resolve issue", body="Closes #123\nFixes #456"
+        )
     )
     assert len(result.references) == 2
     issues = {r["issue"] for r in result.references}

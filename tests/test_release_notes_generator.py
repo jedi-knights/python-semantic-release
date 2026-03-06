@@ -25,15 +25,14 @@ def _ctx_with_release(tmp_path, commits, version="1.1.0", last="1.0.0"):
 
 # --- generate_notes ---
 
+
 def test_generate_notes_empty_commits(tmp_path, generator):
     ctx = make_context(tmp_path, commits=[])
     assert generator.generate_notes(ctx) == ""
 
 
 def test_generate_notes_contains_version(tmp_path, generator):
-    ctx = _ctx_with_release(
-        tmp_path, [make_commit(message="feat: add x")]
-    )
+    ctx = _ctx_with_release(tmp_path, [make_commit(message="feat: add x")])
     notes = generator.generate_notes(ctx)
     assert "1.1.0" in notes
 
@@ -48,9 +47,7 @@ def test_generate_notes_features_section(tmp_path, generator):
 
 
 def test_generate_notes_bug_fixes_section(tmp_path, generator):
-    ctx = _ctx_with_release(
-        tmp_path, [make_commit(message="fix: resolve bug")]
-    )
+    ctx = _ctx_with_release(tmp_path, [make_commit(message="fix: resolve bug")])
     notes = generator.generate_notes(ctx)
     assert "Bug Fixes" in notes
     assert "resolve bug" in notes
@@ -80,16 +77,18 @@ def test_generate_notes_unknown_type_grouped_as_other(tmp_path, generator):
 def test_generate_notes_breaking_marker(tmp_path, generator):
     ctx = _ctx_with_release(
         tmp_path,
-        [make_commit(message="feat!: breaking", body="BREAKING CHANGE: removed")],
+        [
+            make_commit(
+                message="feat!: breaking", body="BREAKING CHANGE: removed"
+            )
+        ],
     )
     notes = generator.generate_notes(ctx)
     assert "BREAKING CHANGE" in notes
 
 
 def test_generate_notes_compare_url(tmp_path, generator):
-    ctx = _ctx_with_release(
-        tmp_path, [make_commit(message="feat: x")]
-    )
+    ctx = _ctx_with_release(tmp_path, [make_commit(message="feat: x")])
     notes = generator.generate_notes(ctx)
     assert "compare" in notes or "v1.0.0...v1.1.0" in notes
 
@@ -120,9 +119,7 @@ def test_generate_notes_issue_reference_linked(tmp_path, generator):
 
 
 def test_generate_notes_no_repo_url_no_links(tmp_path, generator):
-    ctx = _ctx_with_release(
-        tmp_path, [make_commit(message="feat: x")]
-    )
+    ctx = _ctx_with_release(tmp_path, [make_commit(message="feat: x")])
     ctx.options.repository_url = ""
     notes = generator.generate_notes(ctx)
     # still generates notes but no hrefs
@@ -130,9 +127,7 @@ def test_generate_notes_no_repo_url_no_links(tmp_path, generator):
 
 
 def test_generate_notes_ssh_url_converted(tmp_path, generator):
-    ctx = _ctx_with_release(
-        tmp_path, [make_commit(message="feat: y")]
-    )
+    ctx = _ctx_with_release(tmp_path, [make_commit(message="feat: y")])
     ctx.options.repository_url = "git@github.com:owner/repo.git"
     notes = generator.generate_notes(ctx)
     assert "https://github.com/owner/repo" in notes
@@ -160,6 +155,7 @@ def test_generate_notes_sections_ordered_by_priority(tmp_path, generator):
 
 
 # --- ChangelogService ---
+
 
 def test_changelog_service_creates_file(tmp_path, generator):
     svc = ChangelogService(generator=generator)
@@ -203,7 +199,9 @@ def test_changelog_service_strips_existing_title(tmp_path, generator):
 def test_get_compare_url_no_last_release(tmp_path, generator):
     ctx = make_context(tmp_path, commits=[make_commit(message="feat: x")])
     ctx.last_release = None
-    ctx.next_release = Release(version="0.1.0", git_tag="v0.1.0", git_head="sha")
+    ctx.next_release = Release(
+        version="0.1.0", git_tag="v0.1.0", git_head="sha"
+    )
     notes = generator.generate_notes(ctx)
     assert "0.1.0" in notes
 
@@ -220,6 +218,7 @@ def test_format_issue_references_non_github_url(tmp_path, generator):
 
 def test_format_section_empty_commits_returns_empty(tmp_path, generator):
     from python_semantic_release.changelog.generator import CommitGroup
+
     ctx = make_context(tmp_path)
     empty_group = CommitGroup(title="Features", commits=[], priority=1)
     result = generator._format_section(empty_group, ctx)

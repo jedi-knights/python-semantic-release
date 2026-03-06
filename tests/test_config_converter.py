@@ -18,6 +18,7 @@ def _write_js(tmp_path: Path, content: str) -> Path:
 
 # --- _has_plugin ---
 
+
 def test_has_plugin_string_match(converter):
     cfg = {"plugins": ["@semantic-release/commit-analyzer"]}
     assert converter._has_plugin(cfg, "commit-analyzer") is True
@@ -43,6 +44,7 @@ def test_has_plugin_no_plugins_key(converter):
 
 # --- _has_git_plugin ---
 
+
 def test_has_git_plugin_true(converter):
     cfg = {"plugins": ["@semantic-release/git"]}
     assert converter._has_git_plugin(cfg) is True
@@ -59,6 +61,7 @@ def test_has_git_plugin_list_form(converter):
 
 
 # --- _normalize_release_value ---
+
 
 def test_normalize_false_literal(converter):
     assert converter._normalize_release_value(False) is None
@@ -78,14 +81,19 @@ def test_normalize_major(converter):
 
 # --- _transform_release_rule ---
 
+
 def test_transform_rule_type_only(converter):
-    result = converter._transform_release_rule({"type": "feat", "release": "minor"})
+    result = converter._transform_release_rule(
+        {"type": "feat", "release": "minor"}
+    )
     assert result["type"] == "feat"
     assert result["release"] == "minor"
 
 
 def test_transform_rule_false_release(converter):
-    result = converter._transform_release_rule({"type": "docs", "release": False})
+    result = converter._transform_release_rule(
+        {"type": "docs", "release": False}
+    )
     assert result["release"] is None
 
 
@@ -97,12 +105,15 @@ def test_transform_rule_with_scope(converter):
 
 
 def test_transform_rule_omits_missing_keys(converter):
-    result = converter._transform_release_rule({"type": "fix", "release": "patch"})
+    result = converter._transform_release_rule(
+        {"type": "fix", "release": "patch"}
+    )
     assert "scope" not in result
     assert "breaking" not in result
 
 
 # --- _build_options_section ---
+
 
 def test_build_options_with_branches(converter):
     result = converter._build_options_section({"branches": ["main"]})
@@ -128,6 +139,7 @@ def test_build_options_includes_repository_url(converter):
 
 
 # --- _transform_config ---
+
 
 def test_transform_config_always_includes_version(converter):
     result = converter._transform_config({})
@@ -192,11 +204,7 @@ def test_transform_config_github_plugin(converter):
 
 def test_transform_config_git_plugin(converter):
     result = converter._transform_config(
-        {
-            "plugins": [
-                ["@semantic-release/git", {"assets": ["CHANGELOG.md"]}]
-            ]
-        }
+        {"plugins": [["@semantic-release/git", {"assets": ["CHANGELOG.md"]}]]}
     )
     assert "git" in result
     assert result["git"]["assets"] == ["CHANGELOG.md"]
@@ -218,6 +226,7 @@ def test_transform_config_release_rules(converter):
 
 
 # --- _extract_github_config ---
+
 
 def test_extract_github_assets(converter):
     js_config = {
@@ -247,15 +256,14 @@ def test_extract_github_success_comment(converter):
 
 def test_extract_github_labels(converter):
     js_config = {
-        "plugins": [
-            ["@semantic-release/github", {"labels": ["released"]}]
-        ]
+        "plugins": [["@semantic-release/github", {"labels": ["released"]}]]
     }
     result = converter._extract_github_config(js_config)
     assert result["labels"] == ["released"]
 
 
 # --- _extract_git_config ---
+
 
 def test_extract_git_assets(converter):
     js_config = {
@@ -277,7 +285,10 @@ def test_extract_git_commit_message_from_top_level(converter):
 def test_extract_git_message_from_plugin(converter):
     js_config = {
         "plugins": [
-            ["@semantic-release/git", {"message": "chore: ${nextRelease.version}"}]
+            [
+                "@semantic-release/git",
+                {"message": "chore: ${nextRelease.version}"},
+            ]
         ]
     }
     result = converter._extract_git_config(js_config)

@@ -42,7 +42,10 @@ def test_commit_is_frozen():
 
 def test_commit_defaults_empty_body():
     commit = Commit(
-        hash="h", message="m", author_name="n", author_email="e",
+        hash="h",
+        message="m",
+        author_name="n",
+        author_email="e",
         date=datetime.now(),
     )
     assert commit.body == ""
@@ -50,13 +53,22 @@ def test_commit_defaults_empty_body():
 
 def test_parsed_commit_fields():
     raw = Commit(
-        hash="h", message="feat: x", author_name="n",
-        author_email="e", date=datetime.now(),
+        hash="h",
+        message="feat: x",
+        author_name="n",
+        author_email="e",
+        date=datetime.now(),
     )
     pc = ParsedCommit(
-        type="feat", scope="api", subject="add x", body="",
-        breaking=False, mentions=["user"], references=[{"issue": "1"}],
-        revert=False, raw_commit=raw,
+        type="feat",
+        scope="api",
+        subject="add x",
+        body="",
+        breaking=False,
+        mentions=["user"],
+        references=[{"issue": "1"}],
+        revert=False,
+        raw_commit=raw,
     )
     assert pc.type == "feat"
     assert pc.scope == "api"

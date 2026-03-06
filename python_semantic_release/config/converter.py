@@ -121,9 +121,8 @@ class ConfigConverter:
         return transformed
 
     def _is_named_plugin(self, plugin: list, name: str) -> bool:
-        return (
-            len(plugin) == 2
-            and (plugin[0] == name or plugin[0].endswith(f"/{name}"))
+        return len(plugin) == 2 and (
+            plugin[0] == name or plugin[0].endswith(f"/{name}")
         )
 
     def _extract_github_config(
@@ -149,9 +148,7 @@ class ConfigConverter:
             if js_key in opts:
                 out[yaml_key] = opts[js_key]
 
-    def _extract_git_config(
-        self, js_config: dict[str, Any]
-    ) -> dict[str, Any]:
+    def _extract_git_config(self, js_config: dict[str, Any]) -> dict[str, Any]:
         git_config: dict[str, Any] = {}
         for plugin in js_config.get("plugins", []):
             if isinstance(plugin, list) and self._is_named_plugin(

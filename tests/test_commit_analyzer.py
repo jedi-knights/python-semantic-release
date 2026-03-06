@@ -16,6 +16,7 @@ from tests.conftest import make_commit, make_context, make_parsed_commit
 
 # --- TypeReleaseRule ---
 
+
 def test_type_rule_matches_by_type():
     rule = TypeReleaseRule(ReleaseRule(type="feat", release="minor"))
     assert rule.matches(make_parsed_commit(type="feat")) is True
@@ -32,36 +33,52 @@ def test_type_rule_none_type_never_matches():
 
 
 def test_type_rule_scope_filter_matches():
-    rule = TypeReleaseRule(ReleaseRule(type="feat", scope="api", release="minor"))
+    rule = TypeReleaseRule(
+        ReleaseRule(type="feat", scope="api", release="minor")
+    )
     assert rule.matches(make_parsed_commit(type="feat", scope="api")) is True
 
 
 def test_type_rule_scope_filter_excludes():
-    rule = TypeReleaseRule(ReleaseRule(type="feat", scope="api", release="minor"))
+    rule = TypeReleaseRule(
+        ReleaseRule(type="feat", scope="api", release="minor")
+    )
     assert rule.matches(make_parsed_commit(type="feat", scope="db")) is False
 
 
 def test_type_rule_scope_none_matches_any_scope():
     rule = TypeReleaseRule(ReleaseRule(type="feat", release="minor"))
-    assert rule.matches(make_parsed_commit(type="feat", scope="anything")) is True
+    assert (
+        rule.matches(make_parsed_commit(type="feat", scope="anything")) is True
+    )
 
 
 def test_type_rule_breaking_filter_true():
-    rule = TypeReleaseRule(ReleaseRule(type="feat", breaking=True, release="major"))
+    rule = TypeReleaseRule(
+        ReleaseRule(type="feat", breaking=True, release="major")
+    )
     assert rule.matches(make_parsed_commit(type="feat", breaking=True)) is True
-    assert rule.matches(make_parsed_commit(type="feat", breaking=False)) is False
+    assert (
+        rule.matches(make_parsed_commit(type="feat", breaking=False)) is False
+    )
 
 
 def test_type_rule_breaking_filter_false():
-    rule = TypeReleaseRule(ReleaseRule(type="fix", breaking=False, release="patch"))
+    rule = TypeReleaseRule(
+        ReleaseRule(type="fix", breaking=False, release="patch")
+    )
     assert rule.matches(make_parsed_commit(type="fix", breaking=False)) is True
     assert rule.matches(make_parsed_commit(type="fix", breaking=True)) is False
 
 
 def test_type_rule_revert_filter():
-    rule = TypeReleaseRule(ReleaseRule(type="revert", revert=True, release="patch"))
+    rule = TypeReleaseRule(
+        ReleaseRule(type="revert", revert=True, release="patch")
+    )
     assert rule.matches(make_parsed_commit(type="revert", revert=True)) is True
-    assert rule.matches(make_parsed_commit(type="revert", revert=False)) is False
+    assert (
+        rule.matches(make_parsed_commit(type="revert", revert=False)) is False
+    )
 
 
 def test_type_rule_get_release_type_minor():
@@ -86,6 +103,7 @@ def test_type_rule_get_release_type_none():
 
 # --- BreakingChangeRule ---
 
+
 def test_breaking_rule_matches_breaking_commit():
     rule = BreakingChangeRule(ReleaseRule(breaking=True, release="major"))
     assert rule.matches(make_parsed_commit(breaking=True)) is True
@@ -98,6 +116,7 @@ def test_breaking_rule_no_match_non_breaking():
 
 # --- RevertRule ---
 
+
 def test_revert_rule_matches_revert_commit():
     rule = RevertRule(ReleaseRule(revert=True, release="patch"))
     assert rule.matches(make_parsed_commit(revert=True)) is True
@@ -109,6 +128,7 @@ def test_revert_rule_no_match_non_revert():
 
 
 # --- ReleaseRuleFactory ---
+
 
 def test_factory_creates_breaking_rule():
     rule = ReleaseRuleFactory.create_strategy(
@@ -140,6 +160,7 @@ def test_factory_type_with_breaking_creates_type_rule():
 
 
 # --- CommitAnalyzer ---
+
 
 @pytest.fixture
 def analyzer() -> CommitAnalyzer:
@@ -180,7 +201,9 @@ def test_analyze_breaking_body_returns_major(tmp_path, analyzer):
 
 
 def test_analyze_breaking_exclamation_returns_major(tmp_path, analyzer):
-    ctx = make_context(tmp_path, commits=[make_commit(message="feat!: breaking")])
+    ctx = make_context(
+        tmp_path, commits=[make_commit(message="feat!: breaking")]
+    )
     assert analyzer.analyze_commits(ctx) == ReleaseType.MAJOR
 
 

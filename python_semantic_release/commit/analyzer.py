@@ -33,7 +33,9 @@ class ReleaseRuleStrategy(ABC):
         pass
 
     def get_release_type(self) -> ReleaseType | None:
-        return _RELEASE_MAP.get(self.rule.release) if self.rule.release else None
+        return (
+            _RELEASE_MAP.get(self.rule.release) if self.rule.release else None
+        )
 
 
 class TypeReleaseRule(ReleaseRuleStrategy):
@@ -41,7 +43,9 @@ class TypeReleaseRule(ReleaseRuleStrategy):
         return self.rule.scope is None or commit.scope == self.rule.scope
 
     def _breaking_matches(self, commit: ParsedCommit) -> bool:
-        return self.rule.breaking is None or commit.breaking == self.rule.breaking
+        return (
+            self.rule.breaking is None or commit.breaking == self.rule.breaking
+        )
 
     def _revert_matches(self, commit: ParsedCommit) -> bool:
         return self.rule.revert is None or commit.revert == self.rule.revert
@@ -111,9 +115,7 @@ class CommitAnalyzer:
                 return rule.get_release_type()
         return None
 
-    def _higher_priority(
-        self, a: ReleaseType, b: ReleaseType
-    ) -> ReleaseType:
+    def _higher_priority(self, a: ReleaseType, b: ReleaseType) -> ReleaseType:
         return a if _RELEASE_PRIORITY[a] > _RELEASE_PRIORITY[b] else b
 
     def analyze_commits(self, context: Context) -> ReleaseType | None:

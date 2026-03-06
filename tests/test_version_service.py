@@ -8,6 +8,7 @@ from python_semantic_release.version.service import (
 
 # --- SemanticVersion.parse ---
 
+
 def test_parse_simple_version():
     v = SemanticVersion.parse("1.2.3")
     assert v.major == 1
@@ -58,6 +59,7 @@ def test_parse_zero_version():
 
 # --- SemanticVersion.__str__ ---
 
+
 def test_str_simple():
     assert str(SemanticVersion(1, 2, 3)) == "1.2.3"
 
@@ -67,7 +69,10 @@ def test_str_with_prerelease():
 
 
 def test_str_with_build_metadata():
-    assert str(SemanticVersion(1, 0, 0, build_metadata="sha.abc")) == "1.0.0+sha.abc"
+    assert (
+        str(SemanticVersion(1, 0, 0, build_metadata="sha.abc"))
+        == "1.0.0+sha.abc"
+    )
 
 
 def test_str_with_prerelease_and_build():
@@ -76,6 +81,7 @@ def test_str_with_prerelease_and_build():
 
 
 # --- SemanticVersion.bump ---
+
 
 def test_bump_major():
     v = SemanticVersion(1, 2, 3)
@@ -115,6 +121,7 @@ def test_bump_zero_version_patch():
 
 # --- VersionService.calculate_next_version ---
 
+
 @pytest.fixture
 def service() -> VersionService:
     return VersionService()
@@ -145,10 +152,13 @@ def test_calculate_first_patch(service):
 
 
 def test_calculate_strips_v_prefix(service):
-    assert service.calculate_next_version("v1.2.3", ReleaseType.PATCH) == "1.2.4"
+    assert (
+        service.calculate_next_version("v1.2.3", ReleaseType.PATCH) == "1.2.4"
+    )
 
 
 # --- VersionService.update_version_file ---
+
 
 def test_update_version_file_writes_content(tmp_path, service):
     path = tmp_path / "VERSION"
@@ -164,6 +174,7 @@ def test_update_version_file_overwrites(tmp_path, service):
 
 
 # --- VersionService.get_current_version ---
+
 
 def test_get_current_version(tmp_path, service):
     path = tmp_path / "VERSION"
@@ -190,6 +201,7 @@ def test_get_current_version_empty_file(tmp_path, service):
 
 def test_bump_unknown_release_type_raises(service):
     from python_semantic_release.version.service import SemanticVersion
+
     v = SemanticVersion(1, 0, 0)
     with pytest.raises(ValueError):
         v.bump("unknown")  # type: ignore[arg-type]
@@ -200,4 +212,5 @@ def test_update_pyproject_toml(tmp_path, service):
     pyproject.write_text('[project]\nversion = "0.1.0"\n')
     service.update_pyproject_toml(pyproject, "1.0.0")
     import toml
+
     assert toml.load(pyproject)["project"]["version"] == "1.0.0"

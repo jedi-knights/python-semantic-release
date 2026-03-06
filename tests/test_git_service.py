@@ -13,6 +13,7 @@ def service(tmp_path) -> GitService:
 
 # --- _parse_commits ---
 
+
 def test_parse_commits_single(service):
     raw = (
         "abc123\n"
@@ -74,9 +75,12 @@ def test_parse_commits_date_converted(service):
 
 # --- get_last_tag ---
 
+
 def test_get_last_tag_returns_first(service):
     with patch("subprocess.run") as mock_run:
-        mock_run.return_value = MagicMock(stdout="v2.0.0\nv1.0.0\n", returncode=0)
+        mock_run.return_value = MagicMock(
+            stdout="v2.0.0\nv1.0.0\n", returncode=0
+        )
         tag = service.get_last_tag()
     assert tag == "v2.0.0"
 
@@ -90,12 +94,16 @@ def test_get_last_tag_no_tags(service):
 
 def test_get_last_tag_subprocess_error_returns_none(service):
     import subprocess
-    with patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, "git")):
+
+    with patch(
+        "subprocess.run", side_effect=subprocess.CalledProcessError(1, "git")
+    ):
         tag = service.get_last_tag()
     assert tag is None
 
 
 # --- tag_exists ---
+
 
 def test_tag_exists_true(service):
     with patch("subprocess.run") as mock_run:
@@ -111,6 +119,7 @@ def test_tag_exists_false(service):
 
 # --- get_current_branch ---
 
+
 def test_get_current_branch(service):
     with patch("subprocess.run") as mock_run:
         mock_run.return_value = MagicMock(stdout="main\n")
@@ -118,6 +127,7 @@ def test_get_current_branch(service):
 
 
 # --- get_commit_sha ---
+
 
 def test_get_commit_sha_head(service):
     with patch("subprocess.run") as mock_run:
@@ -133,15 +143,19 @@ def test_get_commit_sha_ref(service):
 
 # --- get_repository_url ---
 
+
 def test_get_repository_url(service):
     with patch("subprocess.run") as mock_run:
         mock_run.return_value = MagicMock(
             stdout="https://github.com/owner/repo.git\n"
         )
-        assert service.get_repository_url() == "https://github.com/owner/repo.git"
+        assert (
+            service.get_repository_url() == "https://github.com/owner/repo.git"
+        )
 
 
 # --- get_modified_files ---
+
 
 def test_get_modified_files(service):
     with patch("subprocess.run") as mock_run:
@@ -158,6 +172,7 @@ def test_get_modified_files_empty(service):
 
 
 # --- get_commits ---
+
 
 def test_get_commits_calls_git_log(service):
     raw = "sha1\nAuthor\na@b.com\n1705312200\nfeat: x\n--END--\n"
@@ -185,6 +200,7 @@ def test_get_commits_empty_returns_empty(service):
 
 # --- create_tag ---
 
+
 def test_create_tag_runs_git_tag(service):
     with patch("subprocess.run") as mock_run:
         mock_run.return_value = MagicMock()
@@ -203,6 +219,7 @@ def test_create_tag_force_flag(service):
 
 
 # --- delete_tag ---
+
 
 def test_delete_tag_local(service):
     with patch("subprocess.run") as mock_run:
@@ -224,6 +241,7 @@ def test_delete_tag_with_remote(service):
 
 # --- add_files ---
 
+
 def test_add_files_runs_git_add(service):
     with patch("subprocess.run") as mock_run:
         mock_run.return_value = MagicMock()
@@ -236,6 +254,7 @@ def test_add_files_runs_git_add(service):
 
 # --- commit ---
 
+
 def test_commit_runs_git_commit(service):
     with patch("subprocess.run") as mock_run:
         mock_run.return_value = MagicMock()
@@ -246,6 +265,7 @@ def test_commit_runs_git_commit(service):
 
 
 # --- push ---
+
 
 def test_push_default(service):
     with patch("subprocess.run") as mock_run:
